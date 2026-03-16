@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: drishya
+      POSTGRES_PASSWORD: drishya_pass
+      POSTGRES_DB: drishyamitra
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://drishya:drishya_pass@db:5432/drishyamitra
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    depends_on:
+      - db
+    expose:
+      - "8000"
+
+  proxy:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+
